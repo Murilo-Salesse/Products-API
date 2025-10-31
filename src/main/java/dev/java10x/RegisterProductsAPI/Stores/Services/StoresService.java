@@ -36,7 +36,7 @@ public class StoresService {
         List<ProductModel> products = dto.getProducts() != null
                 ? new ArrayList<>(dto.getProducts().stream()
                 .map(p -> productsRepository.findById(p.getId())
-                        .orElseThrow(() -> new RuntimeException("Produto não encontrado: " + p.getId())))
+                        .orElseThrow(() -> new EntityNotFoundException("Produto não encontrado: " + p.getId())))
                 .toList())
                 : new ArrayList<>();
 
