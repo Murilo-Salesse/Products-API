@@ -2,6 +2,7 @@ package dev.java10x.RegisterProductsAPI.Stores.Controller;
 
 import dev.java10x.RegisterProductsAPI.Stores.DTOS.*;
 import dev.java10x.RegisterProductsAPI.Stores.Services.StoresService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +19,7 @@ public class StoreController {
     }
 
     @PostMapping
-    public ResponseEntity<StoreDTO> createStore(@RequestBody StoreWithProductsDTO dto) {
+    public ResponseEntity<StoreDTO> createStore(@Valid @RequestBody StoreWithProductsDTO dto) {
         StoreDTO createdStore = storesService.createStoreWithProducts(dto);
         return ResponseEntity.status(201).body(createdStore);
     }
@@ -34,24 +35,20 @@ public class StoreController {
 
     @GetMapping("/{id}")
     public ResponseEntity<StoreWithProductsDTO> listStoreById(@PathVariable Long id) {
-        return storesService.searchStoreById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(storesService.searchStoreById(id));
     }
+
 
     @PutMapping("/{id}")
     public ResponseEntity<StoreWithProductsDTO> updateStore(
-            @PathVariable Long id, @RequestBody StoreWithProductsDTO dto) {
-        return storesService.updateStore(id, dto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+            @PathVariable Long id,
+            @RequestBody StoreWithProductsDTO dto) {
+        return ResponseEntity.ok(storesService.updateStore(id, dto));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        if (storesService.deleteStore(id)) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
+    public ResponseEntity<Void> deleteStore(@PathVariable Long id) {
+        storesService.deleteStore(id);
+        return ResponseEntity.noContent().build();
     }
 }

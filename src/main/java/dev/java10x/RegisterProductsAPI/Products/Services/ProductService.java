@@ -9,6 +9,7 @@ import dev.java10x.RegisterProductsAPI.Products.DTOS.ProductsWithStoresDTO;
 import dev.java10x.RegisterProductsAPI.Products.DTOS.ProductsDTO;
 import dev.java10x.RegisterProductsAPI.Products.Models.ProductModel;
 import dev.java10x.RegisterProductsAPI.Products.Repository.ProductsRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -87,14 +88,14 @@ public class ProductService {
                 .toList();
     }
 
-    public Optional<ProductWithAllStoresDTO> searchProductById(Long id) {
+    public ProductWithAllStoresDTO searchProductById(Long id) {
         return productsRepository.findById(id)
                 .map(p -> {
                     List<StoreWithoutProductsDTO> storesDTO = p.getStores().stream()
                             .map(l -> new StoreWithoutProductsDTO(
-                                    p.getId(),
-                                    p.getName(),
-                                    p.getDescription()))
+                                    l.getId(),
+                                    l.getName(),
+                                    l.getAddress()))
                             .toList();
                     return new ProductWithAllStoresDTO(
                             p.getId(),
@@ -103,7 +104,8 @@ public class ProductService {
                             p.getQuantity(),
                             p.getValue(),
                             storesDTO);
-                });
+                })
+                .orElseThrow(() -> new EntityNotFoundException("Produto com ID " + id + " não encontrado"));
     }
 
     @Transactional
@@ -144,16 +146,13 @@ public class ProductService {
     }
 
     @Transactional
-    public boolean deleteProduct(Long id) {
-        Optional<ProductModel> productOpt = productsRepository.findById(id);
-        if (productOpt.isEmpty()) return false;
-
-        ProductModel product = productOpt.get();
+    public void deleteProduct(Long id) {
+       ProductModel product = productsRepository.findById(id)
+                       .orElseThrow(() -> new EntityNotFoundException("Produto com ID " + id + " não encontrada"));
 
         product.getStores().forEach(prod -> prod.getProducts().remove(product));
         product.getStores().clear();
 
         productsRepository.delete(product);
-        return true;
     }
 }

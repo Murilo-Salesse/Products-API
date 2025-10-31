@@ -7,6 +7,7 @@ import dev.java10x.RegisterProductsAPI.Products.DTOS.ProductIdDTO;
 import dev.java10x.RegisterProductsAPI.Products.DTOS.ProductsDTO;
 import dev.java10x.RegisterProductsAPI.Products.Models.ProductModel;
 import dev.java10x.RegisterProductsAPI.Products.Repository.ProductsRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -78,40 +79,42 @@ public class StoresService {
                 .toList();
     }
 
-    public Optional<StoreWithProductsDTO> searchStoreById(long id) {
-        return storesRepository.findById(id)
-                .map(l -> {
-                    List<ProductsDTO> productsDTO = l.getProducts().stream()
-                            .map(p -> new ProductsDTO(
-                                    p.getId(),
-                                    p.getName(),
-                                    p.getDescription(),
-                                    p.getQuantity(),
-                                    p.getValue()))
-                            .toList();
-                    return new StoreWithProductsDTO(l.getId(), l.getName(), l.getAddress(), productsDTO);
-                });
+    public StoreWithProductsDTO searchStoreById(long id) {
+        StoreModel store = storesRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Loja com ID " + id + " não encontrada"));
+
+        List<ProductsDTO> productsDTO = store.getProducts().stream()
+                .map(p -> new ProductsDTO(
+                        p.getId(),
+                        p.getName(),
+                        p.getDescription(),
+                        p.getQuantity(),
+                        p.getValue()))
+                .toList();
+
+        return new StoreWithProductsDTO(
+                store.getId(),
+                store.getName(),
+                store.getAddress(),
+                productsDTO);
     }
 
     @Transactional
-    public Optional<StoreWithProductsDTO> updateStore(long id, StoreWithProductsDTO dto) {
-        Optional<StoreModel> storeOpt = storesRepository.findById(id);
-        if (storeOpt.isEmpty()) return Optional.empty();
+    public StoreWithProductsDTO updateStore(long id, StoreWithProductsDTO dto) {
+        StoreModel store = storesRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Loja com ID " + id + " não encontrada"));
 
-        StoreModel store = storeOpt.get();
         store.setName(dto.getName());
         store.setAddress(dto.getAddress());
 
         List<ProductModel> newProducts = dto.getProducts() != null
-                ? new ArrayList<>(dto.getProducts().stream()
+                ? dto.getProducts().stream()
                 .map(p -> productsRepository.findById(p.getId())
-                        .orElseThrow(() -> new RuntimeException("Produto não encontrado: " + p.getId())))
-                .toList())
+                        .orElseThrow(() -> new EntityNotFoundException("Produto não encontrado: " + p.getId())))
+                .toList()
                 : new ArrayList<>();
 
-        // remover vínculos antigos
         store.getProducts().forEach(prod -> prod.getStores().remove(store));
-        // adicionar novos vínculos
         newProducts.forEach(prod -> prod.getStores().add(store));
 
         store.setProducts(newProducts);
@@ -127,21 +130,21 @@ public class StoresService {
                         p.getValue()))
                 .toList();
 
-        return Optional.of(new StoreWithProductsDTO(updatedStore.getId(), updatedStore.getName(), updatedStore.getAddress(), productsDTO));
+        return new StoreWithProductsDTO(
+                updatedStore.getId(),
+                updatedStore.getName(),
+                updatedStore.getAddress(),
+                productsDTO);
     }
 
     @Transactional
-    public boolean deleteStore(long id) {
-        Optional<StoreModel> storeOpt = storesRepository.findById(id);
-        if (storeOpt.isEmpty()) return false;
+    public void deleteStore(long id) {
+        StoreModel store = storesRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Loja com ID " + id + " não encontrada"));
 
-        StoreModel loja = storeOpt.get();
+        store.getProducts().forEach(prod -> prod.getStores().remove(store));
+        store.getProducts().clear();
 
-        // remover vínculos da tabela intermediária
-        loja.getProducts().forEach(prod -> prod.getStores().remove(loja));
-        loja.getProducts().clear();
-
-        storesRepository.delete(loja);
-        return true;
+        storesRepository.delete(store);
     }
 }

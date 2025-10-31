@@ -1,7 +1,7 @@
 package dev.java10x.RegisterProductsAPI.Products.DTOS;
 
 
-import jakarta.validation.constraints.NotNull;
+
 import lombok.*;
 
 @Data

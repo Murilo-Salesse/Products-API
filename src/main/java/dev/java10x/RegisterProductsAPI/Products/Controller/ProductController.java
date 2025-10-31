@@ -3,6 +3,7 @@ package dev.java10x.RegisterProductsAPI.Products.Controller;
 import dev.java10x.RegisterProductsAPI.Products.DTOS.ProductWithAllStoresDTO;
 import dev.java10x.RegisterProductsAPI.Products.DTOS.ProductsWithStoresDTO;
 import dev.java10x.RegisterProductsAPI.Products.Services.ProductService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +20,7 @@ public class ProductController {
     }
 
     @PostMapping
-    public ResponseEntity<ProductsWithStoresDTO> createProduct(@RequestBody ProductsWithStoresDTO products) {
+    public ResponseEntity<ProductsWithStoresDTO> createProduct(@Valid @RequestBody ProductsWithStoresDTO products) {
         ProductsWithStoresDTO createProduct = productService.createProductWithStore(products);
         return ResponseEntity.status(201).body(createProduct);
     }
@@ -35,14 +36,12 @@ public class ProductController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ProductWithAllStoresDTO> listProductWithId(@PathVariable Long id) {
-        return productService.searchProductById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(productService.searchProductById(id));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ProductsWithStoresDTO> updateProduct(
-            @PathVariable Long id, @RequestBody ProductsWithStoresDTO dto) {
+            @PathVariable Long id, @Valid @RequestBody ProductsWithStoresDTO dto) {
         return productService.updateProduct(id, dto)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -50,10 +49,8 @@ public class ProductController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
-        if (productService.deleteProduct(id)) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
+        productService.deleteProduct(id);
+        return ResponseEntity.noContent().build();
     }
 
 }
