@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductService {
@@ -106,6 +107,13 @@ public class ProductService {
                             storesDTO);
                 })
                 .orElseThrow(() -> new EntityNotFoundException("Produto com ID " + id + " não encontrado"));
+    }
+
+    public List<ProductsDTO> listTop5Products() {
+        return productsRepository.findTop5ByOrderByValueDesc()
+                .stream()
+                .map(p -> new ProductsDTO(p.getId(), p.getName(), p.getDescription() ,p.getQuantity(), p.getValue()))
+                .collect(Collectors.toList());
     }
 
     @Transactional
