@@ -5,4 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface StoresRepository extends JpaRepository<StoreModel, Long> {
 
+    long count();
 }

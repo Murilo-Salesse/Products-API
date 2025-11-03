@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class StoresService {
@@ -97,6 +96,10 @@ public class StoresService {
                 store.getName(),
                 store.getAddress(),
                 productsDTO);
+    }
+
+    public Long returnTotalStores() {
+       return storesRepository.count();
     }
 
     @Transactional

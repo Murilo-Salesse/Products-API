@@ -118,6 +118,17 @@ class ProductControllerTest {
     }
 
     @Test
+    void mustReturnTotalProducts() throws Exception {
+        long totalProducts = 1L;
+        when(productService.returnTotalProducts()).thenReturn(totalProducts);
+
+        mockMvc.perform(get("/api/products/total")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.total").value(totalProducts));
+    }
+
+    @Test
     void mustReturn404WhenUpdateNotFound() throws Exception {
         when(productService.updateProduct(eq(1L), any())).thenReturn(Optional.empty());
 

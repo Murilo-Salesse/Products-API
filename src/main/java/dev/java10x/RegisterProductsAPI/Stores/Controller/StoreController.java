@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/stores")
@@ -38,6 +39,13 @@ public class StoreController {
         return ResponseEntity.ok(storesService.searchStoreById(id));
     }
 
+    @GetMapping("/total")
+    public ResponseEntity<?> listTotalStore() {
+        Long totalStores = storesService.returnTotalStores();
+
+        return ResponseEntity.ok(Map.of("total", totalStores));
+    }
+
 
     @PutMapping("/{id}")
     public ResponseEntity<StoreWithProductsDTO> updateStore(
@@ -45,6 +53,7 @@ public class StoreController {
             @RequestBody StoreWithProductsDTO dto) {
         return ResponseEntity.ok(storesService.updateStore(id, dto));
     }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteStore(@PathVariable Long id) {

@@ -10,6 +10,7 @@ import dev.java10x.RegisterProductsAPI.Stores.Models.StoreModel;
 import dev.java10x.RegisterProductsAPI.Stores.Repository.StoresRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -57,6 +58,7 @@ public class StoreServiceTest {
     }
 
     @Test
+    @DisplayName("Must create a store with products")
     void mustCreateStoreWithProduct() {
         //Arrange
         when(productsRepository.findById(1L)).thenReturn(Optional.of(product));
@@ -83,6 +85,7 @@ public class StoreServiceTest {
     }
 
     @Test
+    @DisplayName("Must show exception when not found a store")
     void mustShowExceptionWhenProductNotFound() {
         // Arrange
         when(productsRepository.findById(1L)).thenReturn(Optional.empty());
@@ -96,6 +99,7 @@ public class StoreServiceTest {
     }
 
     @Test
+    @DisplayName("Must return stores without products")
     void mustReturnStoresWithoutProducts() {
         // Arrange
         StoreModel s1 = new StoreModel();
@@ -115,6 +119,7 @@ public class StoreServiceTest {
     }
 
     @Test
+    @DisplayName("Must return empty list when dont have stores")
     void mustReturnEmptyListWhenHaveNoStores() {
         // Arrange
         when(storesRepository.findAll()).thenReturn(List.of());
@@ -127,6 +132,7 @@ public class StoreServiceTest {
     }
 
     @Test
+    @DisplayName("Must return store with products")
     void mustReturnStoresWithList() {
         // Arrange
         StoreModel store = new StoreModel();
@@ -152,6 +158,23 @@ public class StoreServiceTest {
     }
 
     @Test
+    @DisplayName("Must return total of stores")
+    void mustReturnTotalStores() {
+        //Arrange
+        StoreModel store = new StoreModel();
+        store.setId(1L);
+
+        when(storesRepository.count()).thenReturn(1L);
+
+        // Act
+        Long total = storesService.returnTotalStores();
+
+        // Assert
+        assertEquals(1, total);
+    }
+
+    @Test
+    @DisplayName("Must search a store by ID")
     void mustSearchByStoreId(){
         // Arrange
         StoreModel store = new StoreModel();
@@ -178,6 +201,7 @@ public class StoreServiceTest {
     }
 
     @Test
+    @DisplayName("Must update a store")
     void mustUpdateStore(){
         // Arrange
         StoreModel store = new StoreModel();
@@ -211,6 +235,7 @@ public class StoreServiceTest {
     }
 
     @Test
+    @DisplayName("Must delete a store")
     void mustDeleteStore(){
         // Arrange
         StoreModel store = new StoreModel();

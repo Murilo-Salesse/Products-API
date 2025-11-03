@@ -10,4 +10,5 @@ public interface ProductsRepository extends JpaRepository<ProductModel, Long> {
 
     List<ProductModel> findTop5ByOrderByValueDesc();
 
+    long count();
 }

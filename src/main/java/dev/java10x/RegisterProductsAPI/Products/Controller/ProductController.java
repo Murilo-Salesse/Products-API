@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/products")
@@ -37,6 +38,12 @@ public class ProductController {
     @GetMapping("/{id}")
     public ResponseEntity<ProductWithAllStoresDTO> listProductWithId(@PathVariable Long id) {
         return ResponseEntity.ok(productService.searchProductById(id));
+    }
+
+    @GetMapping("/total")
+    public ResponseEntity<?> listTotalProducts() {
+        Long totalProducts = productService.returnTotalProducts();
+        return ResponseEntity.ok(Map.of("total", totalProducts));
     }
 
     @PutMapping("/{id}")

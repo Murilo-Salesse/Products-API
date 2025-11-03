@@ -142,6 +142,21 @@ public class ProductServiceTest {
     }
 
     @Test
+    void mustReturnTotalStores() {
+        //Arrange
+        ProductModel product = new ProductModel();
+        product.setId(1L);
+
+        when(productsRepository.count()).thenReturn(1L);
+
+        // Act
+        Long total = productService.returnTotalProducts();
+
+        // Assert
+        assertEquals(1, total);
+    }
+
+    @Test
     void mustSearchProductById() {
         // Arrange
         StoreModel store = new StoreModel();

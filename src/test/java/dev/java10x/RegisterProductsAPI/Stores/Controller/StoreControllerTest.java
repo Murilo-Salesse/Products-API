@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.java10x.RegisterProductsAPI.Products.DTOS.ProductIdDTO;
 import dev.java10x.RegisterProductsAPI.Products.DTOS.ProductsDTO;
 import dev.java10x.RegisterProductsAPI.Stores.DTOS.StoreDTO;
+import dev.java10x.RegisterProductsAPI.Stores.DTOS.StoreIdDTO;
 import dev.java10x.RegisterProductsAPI.Stores.DTOS.StoreWithProductsDTO;
 import dev.java10x.RegisterProductsAPI.Stores.DTOS.StoreWithoutProductsDTO;
 import dev.java10x.RegisterProductsAPI.Stores.Services.StoresService;
@@ -132,6 +133,17 @@ public class StoreControllerTest {
     }
 
     @Test
+    void mustReturnTotalStores() throws Exception {
+        long totalStores = 1L;
+        when(storesService.returnTotalStores()).thenReturn(totalStores);
+
+        mockMvc.perform(get("/api/stores/total")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.total").value(totalStores));
+    }
+
+    @Test
     void mustReturn404WhenUpdateNotFound() throws Exception {
         when(storesService.updateStore(eq(1L), any())).thenReturn(null);
 
@@ -140,7 +152,6 @@ public class StoreControllerTest {
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk());
     }
-
 
     @Test
     void mustDeleteStore() throws Exception {

@@ -116,6 +116,8 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
+    public Long returnTotalProducts() { return productsRepository.count(); }
+
     @Transactional
     public Optional<ProductsWithStoresDTO> updateProduct(Long id, ProductsWithStoresDTO dto) {
         Optional<ProductModel> productOpt = productsRepository.findById(id);
