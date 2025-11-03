@@ -6,6 +6,8 @@ import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
@@ -75,5 +77,16 @@ public class ReportService {
             e.printStackTrace();
             throw e;
         }
+    }
+
+    public File generateReportTop5AsFile() throws Exception {
+        byte[] pdfBytes = generateReportTop5();
+
+        File tempFile = File.createTempFile("top-5-produtos-", ".pdf");
+        try (FileOutputStream fos = new FileOutputStream(tempFile)){
+            fos.write(pdfBytes);
+        }
+
+        return  tempFile;
     }
 }
