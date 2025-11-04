@@ -25,7 +25,7 @@ public class UserController {
         this.jwtTokenUtil = jwtTokenUtil;
     }
 
-    @PostMapping
+    @PostMapping("/register")
     public ResponseEntity<UserDTOResponseWithoutToken> createUser(@Valid @RequestBody UserDTO dto) {
         UserDTOResponseWithoutToken createduser = userService.createUser(dto);
         return ResponseEntity.status(201).body(createduser);

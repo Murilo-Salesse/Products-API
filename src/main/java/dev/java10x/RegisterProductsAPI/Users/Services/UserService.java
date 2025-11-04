@@ -44,7 +44,7 @@ public class UserService {
         boolean passwordMatches = passwordEncoder.matches(dto.getPassword(), user.getPassword());
 
         if (!passwordMatches) {
-            throw new RuntimeException("Senha incorreta");
+            throw new EntityNotFoundException("Senha incorreta");
         }
 
         String token = jwtTokenUtil.generateToken(user.getName(), user.getEmail());
