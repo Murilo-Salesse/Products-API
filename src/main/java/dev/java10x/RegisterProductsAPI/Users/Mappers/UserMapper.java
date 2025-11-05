@@ -23,13 +23,13 @@ public class UserMapper {
         return userModel;
     }
 
-    // Converte de UserModel (banco) para UserDTOResponse (saída)
+
     public UserDTOResponseWithToken toUserDTOResponse(UserModel userModel) {
         if (userModel == null) {
             return null;
         }
 
-        // 🔹 Corrigido: ordem dos parâmetros e inclusão do token como null (por padrão)
+
         return new UserDTOResponseWithToken(
                 userModel.getId(),
                 userModel.getName(),
@@ -43,7 +43,7 @@ public class UserMapper {
             return null;
         }
 
-        // 🔹 Corrigido: ordem dos parâmetros e inclusão do token como null (por padrão)
+
         return new UserDTOResponseWithoutToken(
                 userModel.getId(),
                 userModel.getName(),
