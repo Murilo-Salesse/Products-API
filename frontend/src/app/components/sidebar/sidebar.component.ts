@@ -19,4 +19,8 @@ export class SidebarComponent {
   goToDash() {
     this.router.navigate(['/dashboard']);
   }
+
+  goToStores() {
+    this.router.navigate(['/stores']);
+  }
 }

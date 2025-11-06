@@ -1,0 +1,223 @@
+<main class="flex h-screen bg-zinc-100">
+  <app-sidebar></app-sidebar>
+
+  <section class="m-5 flex flex-col gap-8 w-full">
+    <div class="flex flex-col gap-2">
+      <h1 class="text-4xl font-semibold text-zinc-800">Lojas Cadastradas</h1>
+      <p class="text-gray-600 text-base">
+        Visualize todas as lojas e seus produtos associados.
+      </p>
+
+      <button class="mt-4 flex flex-start" (click)="openModal()">
+        <span
+          class="bg-zinc-600 text-white px-4 py-2 rounded-lg hover:bg-zinc-700 transition-colors cursor-pointer"
+          >Criar nova loja</span
+        >
+      </button>
+    </div>
+
+    <div *ngIf="isLoading" class="flex justify-center items-center h-full">
+      <div
+        class="animate-spin rounded-full h-10 w-10 border-t-4 border-blue-500"
+      ></div>
+    </div>
+
+    <div
+      *ngIf="!isLoading && errorMessage"
+      class="text-red-600 bg-red-100 border border-red-400 rounded-lg p-4"
+    >
+      {{ errorMessage }}
+    </div>
+
+    <div *ngIf="!isLoading && stores.length > 0" class="grid grid-cols-2 gap-6">
+      <div
+        *ngFor="let store of stores"
+        class="bg-zinc-800 rounded-lg p-6 border border-zinc-100 transition-all duration-300"
+      >
+        <div class="flex justify-between items-start mb-4">
+          <div class="flex flex-col gap-1">
+            <h2 class="text-2xl font-semibold text-zinc-50">
+              {{ store.name }}
+            </h2>
+            <p class="text-gray-200 text-sm">{{ store.address }}</p>
+          </div>
+
+          <div class="flex gap-2">
+            <button
+              (click)="openEditModal(store)"
+              class="p-2 bg-blue-500 hover:bg-blue-600 rounded-lg transition-colors cursor-pointer"
+            >
+              <img src="../../../assets/note-pencil.svg" alt="" />
+            </button>
+
+            <button
+              (click)="deleteStore(store.id)"
+              class="p-2 bg-red-500 hover:bg-red-600 rounded-lg transition-colors cursor-pointer"
+            >
+              <img src="../../../assets/trash.svg" alt="" />
+            </button>
+          </div>
+        </div>
+
+        <div class="mt-4">
+          <h3 class="text-lg font-medium text-zinc-50 mb-2">Produtos:</h3>
+
+          <div *ngIf="store.products.length > 0; else noProducts">
+            <div
+              *ngFor="let product of store.products"
+              class="flex justify-between bg-zinc-50 border border-zinc-200 p-3 rounded-lg mb-2 hover:bg-zinc-100 transition"
+            >
+              <div>
+                <p class="font-semibold text-zinc-800">{{ product.name }}</p>
+                <p class="text-sm text-gray-600">
+                  {{ product.description }}
+                </p>
+              </div>
+
+              <div class="text-right">
+                <p class="text-sm text-gray-600">Qtd: {{ product.quantity }}</p>
+                <p class="font-bold text-zinc-800">
+                  {{ product.value | currency : "BRL" }}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <ng-template #noProducts>
+            <p class="text-gray-500 text-sm italic">
+              Nenhum produto cadastrado.
+            </p>
+          </ng-template>
+        </div>
+      </div>
+    </div>
+
+    <div
+      *ngIf="!isLoading && stores.length === 0"
+      class="text-gray-500 italic text-center py-10"
+    >
+      Nenhuma loja cadastrada até o momento.
+    </div>
+  </section>
+
+  <div
+    *ngIf="showModal"
+    class="fixed inset-0 bg-black/75 flex items-center justify-center z-50"
+    (click)="closeModal()"
+  >
+    <div
+      class="bg-white rounded-lg p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-semibold text-zinc-800">
+          {{ isEditMode ? "Editar Loja" : "Criar Nova Loja" }}
+        </h2>
+        <button
+          (click)="closeModal()"
+          class="text-gray-500 hover:text-gray-700 text-2xl"
+        >
+          &times;
+        </button>
+      </div>
+
+      <form [formGroup]="storeForm" (ngSubmit)="onSubmit()">
+        <div class="flex flex-col gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >Nome da Loja</label
+            >
+            <input
+              type="text"
+              formControlName="name"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zinc-600 focus:border-transparent outline-none"
+              placeholder="Ex: Loja Hayom"
+            />
+            <div
+              *ngIf="
+                storeForm.get('name')?.invalid && storeForm.get('name')?.touched
+              "
+              class="text-red-500 text-sm mt-1"
+            >
+              Nome é obrigatório
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >Endereço</label
+            >
+            <input
+              type="text"
+              formControlName="address"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zinc-600 focus:border-transparent outline-none"
+              placeholder="Ex: Rua das flores, 134"
+            />
+            <div
+              *ngIf="
+                storeForm.get('address')?.invalid &&
+                storeForm.get('address')?.touched
+              "
+              class="text-red-500 text-sm mt-1"
+            >
+              Endereço é obrigatório
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >Produtos</label
+            >
+            <div class="space-y-2">
+              <div
+                *ngFor="let productId of selectedProducts; let i = index"
+                class="flex items-center gap-2"
+              >
+                <input
+                  type="number"
+                  [(ngModel)]="selectedProducts[i]"
+                  [ngModelOptions]="{ standalone: true }"
+                  class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zinc-600 focus:border-transparent outline-none"
+                  placeholder="ID do Produto"
+                  min="1"
+                />
+                <button
+                  type="button"
+                  (click)="removeProduct(i)"
+                  class="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                >
+                  Remover
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              (click)="addProduct()"
+              class="mt-3 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+            >
+              + Adicionar Produto
+            </button>
+          </div>
+
+          <div class="flex gap-3 mt-6">
+            <button
+              type="button"
+              (click)="closeModal()"
+              class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              [disabled]="storeForm.invalid"
+              class="flex-1 px-4 py-2 bg-zinc-600 text-white rounded-lg hover:bg-zinc-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+            >
+              {{ isEditMode ? "Atualizar Loja" : "Criar Loja" }}
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</main>
