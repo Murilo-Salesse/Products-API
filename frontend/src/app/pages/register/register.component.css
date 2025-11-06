@@ -1,0 +1,12 @@
+@keyframes fillButton {
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+.animate-fill {
+  animation: fillButton 1.2s ease-in-out forwards;
+}

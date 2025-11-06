@@ -1,0 +1,56 @@
+<div class="flex h-screen bg-gray-100">
+  <aside class="w-64 bg-zinc-900 text-white flex flex-col">
+    <div
+      class="p-4 text-2xl font-bold border-b border-zinc-800 flex items-center gap-2"
+    >
+      <img src="../../../assets/store.svg" alt="" />
+      Nexzy
+    </div>
+
+    <nav class="flex-1 p-4 space-y-2">
+      <a
+        (click)="goToDash()"
+        class="flex items-center gap-3 p-2 rounded-lg hover:bg-zinc-800 cursor-pointer"
+      >
+        <i class="fa-solid fa-house"></i>
+        <span>Dashboard</span>
+      </a>
+
+      <a
+        href="#"
+        class="flex items-center gap-3 p-2 rounded-lg hover:bg-zinc-800 cursor-pointer"
+      >
+        <i class="fa-solid fa-house"></i>
+        <span>Lojas</span>
+      </a>
+
+      <a
+        href="#"
+        class="flex items-center gap-3 p-2 rounded-lg hover:bg-zinc-800 cursor-pointer"
+      >
+        <i class="fa-solid fa-house"></i>
+        <span>Produtos</span>
+      </a>
+
+      <a
+        href="#"
+        class="flex items-center gap-3 p-2 rounded-lg hover:bg-zinc-800 cursor-pointer"
+      >
+        <i class="fa-solid fa-file"></i>
+        <span>Relatórios</span>
+      </a>
+
+      <a
+        (click)="clearStorage()"
+        class="flex items-center gap-3 p-2 rounded-lg hover:bg-zinc-800 cursor-pointer"
+      >
+        <i class="fa-solid fa-file"></i>
+        <span>Sair</span>
+      </a>
+    </nav>
+
+    <div class="p-4 border-t border-zinc-700 text-sm text-zinc-500">
+      © 2025 Nexzy
+    </div>
+  </aside>
+</div>

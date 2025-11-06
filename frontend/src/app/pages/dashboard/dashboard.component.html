@@ -1,0 +1,85 @@
+<main class="flex h-screen bg-zinc-100">
+  <app-sidebar></app-sidebar>
+
+  <section class="m-5 flex flex-col gap-10 w-full">
+    <div class="flex flex-col gap-2">
+      <h1 class="text-4xl font-semibold text-zinc-800">
+        Olá, Murilo! Que bom ter você aqui!
+      </h1>
+
+      <span class="text-lg text-gray-700 lowercase">
+        {{ currentDate }} - {{ currentTime }}h
+      </span>
+    </div>
+
+    <div class="grid grid-cols-3 gap-4">
+      <ng-container>
+        <div
+          *ngIf="isLoadingStore"
+          class="skeleton-card bg-zinc-700 p-4 rounded-lg w-full flex flex-col"
+        >
+          <div class="skeleton-card-header flex items-center gap-2">
+            <div class="bg-zinc-500 w-8 h-8 rounded-lg animate-pulse"></div>
+            <div class="bg-zinc-500 w-46 h-6 rounded animate-pulse"></div>
+          </div>
+
+          <div class="skeleton-card-body mt-4">
+            <div class="bg-zinc-500 w-16 h-6 rounded animate-pulse"></div>
+          </div>
+        </div>
+
+        <div
+          *ngIf="isLoadingProduct"
+          class="skeleton-card bg-zinc-700 p-4 rounded-lg w-full flex flex-col"
+        >
+          <div class="skeleton-card-header flex items-center gap-2">
+            <div class="bg-zinc-500 w-8 h-8 rounded-lg animate-pulse"></div>
+            <div class="bg-zinc-500 w-46 h-6 rounded animate-pulse"></div>
+          </div>
+
+          <div class="skeleton-card-body mt-4">
+            <div class="bg-zinc-500 w-16 h-6 rounded animate-pulse"></div>
+          </div>
+        </div>
+
+        <div
+          *ngIf="isLoadingStore"
+          class="skeleton-card bg-zinc-700 p-4 rounded-lg w-full flex flex-col"
+        >
+          <div class="skeleton-card-header flex items-center gap-2">
+            <div class="bg-zinc-500 w-8 h-8 rounded-lg animate-pulse"></div>
+            <div class="bg-zinc-500 w-46 h-6 rounded animate-pulse"></div>
+          </div>
+
+          <div class="skeleton-card-body mt-4">
+            <div class="bg-zinc-500 w-16 h-6 rounded animate-pulse"></div>
+          </div>
+        </div>
+      </ng-container>
+
+      <app-infos-store-card
+        *ngIf="!isLoadingStore"
+        [nameCard]="'Lojas Cadastradas'"
+        [totalItemsCard]="totalStores.toString()"
+        [imgCard]="'../../../assets/store.svg'"
+        [altImgCard]="'teste'"
+      ></app-infos-store-card>
+
+      <app-infos-store-card
+        *ngIf="!isLoadingProduct"
+        [nameCard]="'Produtos Cadastrados'"
+        [totalItemsCard]="totalProducts.toString()"
+        [imgCard]="'../../../assets/package.svg'"
+        [altImgCard]="'teste'"
+      ></app-infos-store-card>
+
+      <app-infos-store-card
+        *ngIf="!isLoadingStore"
+        [nameCard]="'Relatórios Enviados'"
+        [totalItemsCard]="'8'"
+        [imgCard]="'../../../assets/mail.svg'"
+        [altImgCard]="'teste'"
+      ></app-infos-store-card>
+    </div>
+  </section>
+</main>

@@ -1,0 +1,88 @@
+<main class="flex h-screen bg-zinc-900 p-4">
+  <div class="flex-1">
+    <img
+      src="assets/thumbnail.png"
+      alt="thumbnail"
+      class="w-full h-full object-cover rounded-lg"
+    />
+  </div>
+
+  <div class="flex-1 flex flex-col justify-center items-center p-10">
+    <div class="w-full max-w-sm flex flex-col gap-20">
+      <div class="flex flex-col -mt-10">
+        <h1 class="text-white text-6xl text-center font-bold">Nexzy</h1>
+      </div>
+
+      <form class="space-y-4" (submit)="$event.preventDefault()">
+        <div>
+          <h1 class="text-2xl font-semibold text-left mb-6 text-white">
+            Criar conta
+          </h1>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-white mb-1">Email</label>
+          <input
+            type="email"
+            class="w-full bg-zinc-800 text-white border-none rounded-lg p-4 focus:outline-none placeholder:text-[#696663]"
+            placeholder="Digite seu email"
+            [(ngModel)]="email"
+            name="email"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-white mb-1">Nome</label>
+          <input
+            type="text"
+            class="w-full bg-zinc-800 text-white border-none rounded-lg p-4 focus:outline-none placeholder:text-[#696663]"
+            placeholder="Digite seu nome"
+            [(ngModel)]="name"
+            name="name"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-white mb-1">Senha</label>
+          <input
+            type="password"
+            class="w-full bg-zinc-800 text-white border-none rounded-lg p-4 focus:outline-none placeholder:text-[#696663]"
+            placeholder="Insira sua senha"
+            [(ngModel)]="password"
+            name="password"
+          />
+        </div>
+
+        <div class="flex flex-col gap-4">
+          <button
+            type="button"
+            (click)="register()"
+            [disabled]="isLoading"
+            class="relative w-full text-white uppercase text-center font-medium p-4 rounded-lg overflow-hidden transition cursor-pointer"
+            [ngClass]="{
+              'bg-[#ED712E] hover:bg-[#c0571f]': !isLoading,
+              'bg-zinc-700 pointer-events-none': isLoading
+            }"
+          >
+            <span
+              *ngIf="isLoading"
+              class="absolute left-0 top-0 h-full bg-[#ED712E] animate-fill"
+            ></span>
+
+            <span class="relative z-10">
+              {{ isLoading ? "Registrando..." : "Registrar" }}
+            </span>
+          </button>
+
+          <div class="mt-5 flex items-center justify-center">
+            <span
+              (click)="goToLogin()"
+              class="text-sm font-medium underline text-center text-white cursor-pointer"
+              >Login</span
+            >
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</main>
