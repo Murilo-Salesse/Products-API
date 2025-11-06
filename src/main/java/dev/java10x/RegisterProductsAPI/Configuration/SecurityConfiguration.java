@@ -13,6 +13,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import static org.springframework.security.config.Customizer.withDefaults;
+
 @Configuration
 public class SecurityConfiguration implements WebMvcConfigurer {
 
@@ -26,16 +28,17 @@ public class SecurityConfiguration implements WebMvcConfigurer {
     // E o tipo SecurityFilterChain é o contrato que o Spring Security usa internamente para montar a cadeia de filtros HTTP (security filters)
     // Entao quando sobe a aplicação, o spring ve que to usando o Bean para configura manualmente
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthEntryPoint entryPoint) throws Exception {
         http
                 // 	•	Desativa o CSRF (Cross-Site Request Forgery).
                 //	•	Explicação rápida: CSRF protege formulários do browser contra requisições forjadas.
-                //	Em APIs REST que usam tokens JWT e não mantêm sessão, normalmente desativa-se CSRF porque o token já provê proteção
+                //	•   Em APIs REST que usam tokens JWT e não mantêm sessão, normalmente desativa-se CSRF porque o token já provê proteção
                 .csrf(AbstractHttpConfigurer::disable)
 
                 // SessionCreationPolicy.STATELESS significa: não criar ou usar sessão HTTP.
                 // Cada requisição é independente — isso é o padrão para APIs REST com JWT.
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // sem sessão
+                .exceptionHandling(ex -> ex.authenticationEntryPoint(entryPoint))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/user/register",
@@ -59,7 +62,8 @@ public class SecurityConfiguration implements WebMvcConfigurer {
                     pq ai ele vai pegar o name e password da request do /login e vai setar como esse user
                     e dps so busca no banco
                  */
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .cors(withDefaults());
 
         return http.build();
     }
@@ -69,12 +73,16 @@ public class SecurityConfiguration implements WebMvcConfigurer {
         return new BCryptPasswordEncoder();
     }
 
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**")
-                .allowedOrigins("http://localhost:4200")
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                .allowedHeaders("*")
-                .allowCredentials(true);
+    @Bean
+    public org.springframework.web.cors.CorsConfigurationSource corsConfigurationSource() {
+        var configuration = new org.springframework.web.cors.CorsConfiguration();
+        configuration.setAllowedOrigins(java.util.List.of("http://localhost:4200"));
+        configuration.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(java.util.List.of("*"));
+        configuration.setAllowCredentials(true);
+
+        var source = new org.springframework.web.cors.UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 }
