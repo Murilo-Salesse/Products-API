@@ -20,7 +20,7 @@ Projeto full stack desenvolvido com **Spring Boot (Java)** e **Angular**, com au
 ### 🔹 Frontend
 - **Angular 18+**
 - **TypeScript**
-- **Angular Material** / **Tailwindcss**
+- **Angular Material** / **Tailwind**
 - **JWT Interceptor**
 - **Serviços REST**
 
