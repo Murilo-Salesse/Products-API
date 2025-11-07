@@ -13,4 +13,11 @@ export const ROUTES = {
     CREATE_STORE: 'stores',
     UPDATE_STORE: 'stores',
   },
+  PRODUCTS: {
+    GET_ALL: 'products',
+    CREATE_PRODUCT: 'products',
+    UPDATE_PRODUCT: 'products',
+    DELETE_PRODUCT: 'products',
+    REPORT_FILE: 'email/sendFile',
+  },
 };
