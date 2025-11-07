@@ -23,7 +23,7 @@ public class EmailController {
 
     @GetMapping("/send")
     public String sendEmail() throws MessagingException {
-        emailService.sendEmail("murilosalesse15@gmail.com", "Relatório", "Segue o relatório em anexo");
+        emailService.sendEmail("userteste@gmail.com", "Relatório", "Segue o relatório em anexo");
         return "E-mail enviado com sucesso!";
     }
 
@@ -32,7 +32,7 @@ public class EmailController {
         File reportFile = reportService.generateReportTop5AsFile();
 
         emailService.sendEmailWithAttachment(
-                "murilosalesse15@gmail.com",
+                "userteste@gmail.com",
                 "Relatório de Produtos Top 5",
                 "Segue em anexo o relatório dos 5 produtos mais caros.",
                 reportFile

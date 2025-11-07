@@ -31,32 +31,42 @@ public class ProductService {
 
     @Transactional
     public ProductsWithStoresDTO createProductWithStore(ProductsWithStoresDTO dto) {
-      ProductModel product = new ProductModel();
+        ProductModel product = new ProductModel();
 
-      product.setName(dto.getName());
-      product.setValue(dto.getValue());
-      product.setDescription(dto.getDescription());
-      product.setQuantity(dto.getQuantity());
+        product.setName(dto.getName());
+        product.setValue(dto.getValue());
+        product.setDescription(dto.getDescription());
+        product.setQuantity(dto.getQuantity());
 
+        List<StoreModel> stores = new ArrayList<>();
+        if (dto.getStores() != null) {
+            for (StoreIdDTO s : dto.getStores()) {
+                StoreModel store = storesRepository.findById(s.getId())
+                        .orElseThrow(() -> new RuntimeException("Loja não encontrada: " + s.getId()));
+                stores.add(store);
+            }
+        }
 
-      List<StoreModel> stores = dto.getStores() != null
-              ? new ArrayList<>(dto.getStores().stream()
-              .map(l -> storesRepository.findById(l.getId())
-                      .orElseThrow(() -> new RuntimeException("Loja não encontrada")))
-              .toList())
-              : new ArrayList<>();
+        // Define a relação nos dois lados
+        product.setStores(stores);
+        for (StoreModel store : stores) {
+            store.getProducts().add(product);
+        }
 
-      product.setStores(stores);
-      stores.forEach(loja -> loja.getProducts().add(product));
+        ProductModel savedProduct = productsRepository.save(product);
 
-      ProductModel saveProduct = productsRepository.save(product);
+        List<StoreIdDTO> storesDTO = savedProduct.getStores().stream()
+                .map(l -> new StoreIdDTO(l.getId()))
+                .collect(Collectors.toList());  // MUDANÇA AQUI
 
-      List<StoreIdDTO> storesDTO = saveProduct.getStores().stream()
-              .map(l -> new StoreIdDTO(l.getId()))
-              .toList();
-
-      return new ProductsWithStoresDTO(saveProduct.getId(), saveProduct.getName(), saveProduct.getDescription(),
-              saveProduct.getQuantity(), saveProduct.getValue(), storesDTO);
+        return new ProductsWithStoresDTO(
+                savedProduct.getId(),
+                savedProduct.getName(),
+                savedProduct.getDescription(),
+                savedProduct.getQuantity(),
+                savedProduct.getValue(),
+                storesDTO
+        );
     }
 
     public List<ProductsDTO> listStoresWithoutStores(){
@@ -67,7 +77,7 @@ public class ProductService {
                         p.getDescription(),
                         p.getQuantity(),
                         p.getValue()))
-                .toList();
+                .collect(Collectors.toList());  // MUDANÇA AQUI
     }
 
     public List<ProductWithAllStoresDTO> listProductsWithStores() {
@@ -78,7 +88,7 @@ public class ProductService {
                                     l.getId(),
                                     l.getName(),
                                     l.getAddress()))
-                            .toList();
+                            .collect(Collectors.toList());  // MUDANÇA AQUI
                     return new ProductWithAllStoresDTO(
                             p.getId(),
                             p.getName(),
@@ -86,7 +96,7 @@ public class ProductService {
                             p.getQuantity(),
                             p.getValue(), storesDTO);
                 })
-                .toList();
+                .collect(Collectors.toList());  // MUDANÇA AQUI
     }
 
     public ProductWithAllStoresDTO searchProductById(Long id) {
@@ -97,7 +107,7 @@ public class ProductService {
                                     l.getId(),
                                     l.getName(),
                                     l.getAddress()))
-                            .toList();
+                            .collect(Collectors.toList());  // MUDANÇA AQUI
                     return new ProductWithAllStoresDTO(
                             p.getId(),
                             p.getName(),
@@ -120,47 +130,66 @@ public class ProductService {
 
     @Transactional
     public Optional<ProductsWithStoresDTO> updateProduct(Long id, ProductsWithStoresDTO dto) {
-        Optional<ProductModel> productOpt = productsRepository.findById(id);
-        if (productOpt.isEmpty()) return Optional.empty();
+        ProductModel product = productsRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Produto não encontrado: " + id));
 
-        ProductModel product = productOpt.get();
+        // Atualiza os campos simples
         product.setName(dto.getName());
         product.setDescription(dto.getDescription());
         product.setQuantity(dto.getQuantity());
         product.setValue(dto.getValue());
 
-        List<StoreModel> newStore = dto.getStores() != null
-                ? new ArrayList<>(dto.getStores().stream()
-                .map(l -> storesRepository.findById(l.getId())
-                        .orElseThrow(() -> new RuntimeException("Loja não encontrada: " + l.getId())))
-                .toList())
-                : new ArrayList<>();
+        // Cria uma cópia da lista para evitar ConcurrentModificationException
+        List<StoreModel> currentStores = new ArrayList<>(product.getStores());
 
-        product.getStores().forEach(loj -> loj.getProducts().remove(product));
-        newStore.forEach(loj -> loj.getProducts().add(product));
+        // Remove relações antigas de ambos os lados
+        for (StoreModel oldStore : currentStores) {
+            oldStore.getProducts().remove(product);
+        }
+        product.getStores().clear();
 
-        product.setStores(newStore);
+        // Adiciona novas lojas
+        if (dto.getStores() != null && !dto.getStores().isEmpty()) {
+            List<StoreModel> newStores = new ArrayList<>();
+            for (StoreIdDTO s : dto.getStores()) {
+                StoreModel store = storesRepository.findById(s.getId())
+                        .orElseThrow(() -> new RuntimeException("Loja não encontrada: " + s.getId()));
+                newStores.add(store);
+            }
 
-        ProductModel attProduct = productsRepository.save(product);
+            // Define a relação nos dois lados
+            product.setStores(newStores);
+            for (StoreModel store : newStores) {
+                if (!store.getProducts().contains(product)) {
+                    store.getProducts().add(product);
+                }
+            }
+        }
 
-        List<StoreIdDTO> storesDTO = attProduct.getStores().stream()
+        ProductModel updated = productsRepository.save(product);
+
+        List<StoreIdDTO> storesDTO = updated.getStores().stream()
                 .map(s -> new StoreIdDTO(s.getId()))
-                .toList();
+                .collect(Collectors.toList());  // MUDANÇA AQUI
 
         return Optional.of(new ProductsWithStoresDTO(
-                attProduct.getId(),
-                attProduct.getName(),
-                attProduct.getDescription(),
-                attProduct.getQuantity(),
-                attProduct.getValue(), storesDTO));
+                updated.getId(),
+                updated.getName(),
+                updated.getDescription(),
+                updated.getQuantity(),
+                updated.getValue(),
+                storesDTO
+        ));
     }
 
     @Transactional
     public void deleteProduct(Long id) {
-       ProductModel product = productsRepository.findById(id)
-                       .orElseThrow(() -> new EntityNotFoundException("Produto com ID " + id + " não encontrada"));
+        ProductModel product = productsRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Produto com ID " + id + " não encontrada"));
 
-        product.getStores().forEach(prod -> prod.getProducts().remove(product));
+        // Cria cópia antes de iterar
+        List<StoreModel> storesCopy = new ArrayList<>(product.getStores());
+        storesCopy.forEach(store -> store.getProducts().remove(product));
         product.getStores().clear();
 
         productsRepository.delete(product);

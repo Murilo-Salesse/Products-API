@@ -7,33 +7,47 @@ import lombok.*;
 import java.util.ArrayList;
 import java.util.List;
 
-// Transforma a classe em uma entidade do banco de dados
-// JPA -> Java Persistence API
 @Entity
 @Table(name = "tb_produtos")
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
+@Getter
+@Setter
 public class ProductModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-
     private Long id;
 
     @Column(name = "nome")
-    private String Name;
+    private String name;
 
     private String description;
     private int quantity;
     private double value;
 
-    // Relação muitos-para-muitos
-    @ManyToMany
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
-            name = "tb_produtos_lojas",                  // nome da tabela intermediária
-            joinColumns = @JoinColumn(name = "produto_id"),  // chave que referencia o produto
-            inverseJoinColumns = @JoinColumn(name = "loja_id") // chave que referencia a loja
+            name = "tb_produtos_lojas",
+            joinColumns = @JoinColumn(name = "produto_id"),
+            inverseJoinColumns = @JoinColumn(name = "loja_id")
     )
     private List<StoreModel> stores = new ArrayList<>();
+
+    // Getter customizado para garantir que sempre retorne uma lista mutável
+    public List<StoreModel> getStores() {
+        if (stores == null) {
+            stores = new ArrayList<>();
+        }
+        return stores;
+    }
+
+    // Setter customizado para garantir que sempre use uma lista mutável
+    public void setStores(List<StoreModel> stores) {
+        if (stores == null) {
+            this.stores = new ArrayList<>();
+        } else {
+            this.stores = new ArrayList<>(stores);
+        }
+    }
 }

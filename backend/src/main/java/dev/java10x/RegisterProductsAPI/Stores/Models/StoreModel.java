@@ -11,7 +11,8 @@ import java.util.List;
 @Table(name = "tb_lojas")
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
+@Getter
+@Setter
 public class StoreModel {
 
     @Id
@@ -21,10 +22,23 @@ public class StoreModel {
     private String name;
     private String address;
 
-    // Essa relação já é mapeada pelo atributo lojas lá na classe ProdutoModel. Eu só quero enxergar o outro lado
-    // O mappedBy informa qual campo é o dono da relação — ou seja, quem tem o @JoinTable
     @ManyToMany(mappedBy = "stores")
     private List<ProductModel> products = new ArrayList<>();
 
+    // Getter customizado para garantir que sempre retorne uma lista mutável
+    public List<ProductModel> getProducts() {
+        if (products == null) {
+            products = new ArrayList<>();
+        }
+        return products;
+    }
 
+    // Setter customizado para garantir que sempre use uma lista mutável
+    public void setProducts(List<ProductModel> products) {
+        if (products == null) {
+            this.products = new ArrayList<>();
+        } else {
+            this.products = new ArrayList<>(products);
+        }
+    }
 }

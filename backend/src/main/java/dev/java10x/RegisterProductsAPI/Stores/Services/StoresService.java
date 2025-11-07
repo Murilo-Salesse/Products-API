@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class StoresService {
@@ -36,7 +37,7 @@ public class StoresService {
                 ? new ArrayList<>(dto.getProducts().stream()
                 .map(p -> productsRepository.findById(p.getId())
                         .orElseThrow(() -> new EntityNotFoundException("Produto não encontrado: " + p.getId())))
-                .toList())
+                .collect(Collectors.toList()))  // MUDANÇA AQUI
                 : new ArrayList<>();
 
         store.setProducts(products);
@@ -46,7 +47,7 @@ public class StoresService {
 
         List<ProductIdDTO> produtosDTO = savedStore.getProducts().stream()
                 .map(p -> new ProductIdDTO(p.getId()))
-                .toList();
+                .collect(Collectors.toList());  // MUDANÇA AQUI
 
         return new StoreDTO(
                 savedStore.getId(),
@@ -60,7 +61,7 @@ public class StoresService {
                 .map(l -> new StoreWithoutProductsDTO(l.getId(),
                         l.getName(),
                         l.getAddress()))
-                .toList();
+                .collect(Collectors.toList());  // MUDANÇA AQUI
     }
 
     public List<StoreWithProductsDTO> listStoreWithProducts() {
@@ -72,10 +73,10 @@ public class StoresService {
                                     p.getDescription(),
                                     p.getQuantity(),
                                     p.getValue()))
-                            .toList();
+                            .collect(Collectors.toList());  // MUDANÇA AQUI
                     return new StoreWithProductsDTO(l.getId(), l.getName(), l.getAddress(), productsDTO);
                 })
-                .toList();
+                .collect(Collectors.toList());  // MUDANÇA AQUI
     }
 
     public StoreWithProductsDTO searchStoreById(long id) {
@@ -89,7 +90,7 @@ public class StoresService {
                         p.getDescription(),
                         p.getQuantity(),
                         p.getValue()))
-                .toList();
+                .collect(Collectors.toList());  // MUDANÇA AQUI
 
         return new StoreWithProductsDTO(
                 store.getId(),
@@ -99,7 +100,7 @@ public class StoresService {
     }
 
     public Long returnTotalStores() {
-       return storesRepository.count();
+        return storesRepository.count();
     }
 
     @Transactional
@@ -110,15 +111,27 @@ public class StoresService {
         store.setName(dto.getName());
         store.setAddress(dto.getAddress());
 
+        // Busca os novos produtos e cria uma lista mutável
         List<ProductModel> newProducts = dto.getProducts() != null
-                ? dto.getProducts().stream()
+                ? new ArrayList<>(dto.getProducts().stream()
                 .map(p -> productsRepository.findById(p.getId())
                         .orElseThrow(() -> new EntityNotFoundException("Produto não encontrado: " + p.getId())))
-                .toList()
+                .collect(Collectors.toList()))  // MUDANÇA AQUI
                 : new ArrayList<>();
 
-        store.getProducts().forEach(prod -> prod.getStores().remove(store));
-        newProducts.forEach(prod -> prod.getStores().add(store));
+        // Cria cópia da lista atual antes de modificar
+        List<ProductModel> currentProducts = new ArrayList<>(store.getProducts());
+
+        // Remove relações antigas
+        currentProducts.forEach(prod -> prod.getStores().remove(store));
+        store.getProducts().clear();
+
+        // Adiciona novas relações
+        newProducts.forEach(prod -> {
+            if (!prod.getStores().contains(store)) {
+                prod.getStores().add(store);
+            }
+        });
 
         store.setProducts(newProducts);
 
@@ -131,7 +144,7 @@ public class StoresService {
                         p.getDescription(),
                         p.getQuantity(),
                         p.getValue()))
-                .toList();
+                .collect(Collectors.toList());  // MUDANÇA AQUI
 
         return new StoreWithProductsDTO(
                 updatedStore.getId(),
@@ -145,7 +158,9 @@ public class StoresService {
         StoreModel store = storesRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Loja com ID " + id + " não encontrada"));
 
-        store.getProducts().forEach(prod -> prod.getStores().remove(store));
+        // Cria cópia antes de iterar
+        List<ProductModel> productsCopy = new ArrayList<>(store.getProducts());
+        productsCopy.forEach(prod -> prod.getStores().remove(store));
         store.getProducts().clear();
 
         storesRepository.delete(store);
