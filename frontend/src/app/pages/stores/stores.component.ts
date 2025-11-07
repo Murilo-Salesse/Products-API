@@ -120,7 +120,6 @@ export class StoresComponent implements OnInit {
             },
           });
       } else {
-        // Criar nova loja
         this.storesService.createStore(storeData).subscribe({
           next: (res) => {
             console.log('Loja criada com sucesso:', res);
